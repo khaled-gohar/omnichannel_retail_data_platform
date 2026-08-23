@@ -1,0 +1,21 @@
+[project]
+name = "omnichannel-retail-data-platform"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Khaled Gohar", email = "khaledg.gohar@email.com" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "fastexcel>=0.21.0",
+    "ipykernel>=7.3.0",
+    "psycopg2>=2.9.12",
+]
+
+[project.scripts]
+omnichannel-retail-data-platform = "omnichannel_retail_data_platform:main"
+
+[build-system]
+requires = ["uv_build>=0.12.5,<0.13.0"]
+build-backend = "uv_build"

@@ -1,0 +1,64 @@
+ProductCode,ProductName,Brand,SubcategoryName,UnitPrice,PrimarySupplier,ProductDescription,hash_key,source_id
+ELE-001,Laptops M001,Acme,Laptops,220.9,Supplier A,"Imported item, refer to the supplier datasheet for full specifications and warranty terms.",32e706298fadc1a606cb0fb39a1de644,SAP-100001
+ELE-002,Audio M002,Globex,Audio,648.68,Supplier B,"One of the stronger sellers in its category, frequently bundled with accessories at checkout.",386ecbe06b65a6a48b8148f6b38a088c,SAP-100002
+APP-003,Mens M003,Initech,Mens,412.55,Supplier C,"Older catalog line being phased out, only limited stock remains in the central warehouse.",01a9e71fde8a774bcf36d58b47378190,SAP-100003
+APP-004,Womens M004,Umbra,Womens,686.54,Supplier D,"Standard catalog product, ships from the central distribution center within two business days.",571aa8766c307511b2b9437a28df6ec4,SAP-100004
+APP-005,Kids M005,Stark,Kids,260.92,Supplier E,"Imported item, refer to the supplier datasheet for full specifications and warranty terms.",562b0f79c37459eef50bea63371ecd7b,SAP-100005
+HOM-006,Kitchen M006,Wayne,Kitchen,105.46,Supplier F,"One of the stronger sellers in its category, frequently bundled with accessories at checkout.",d8f564135be6128e18c267976142ea7d,SAP-100006
+HOM-007,Furniture M007,Soylent,Furniture,319.4,Supplier G,"Older catalog line being phased out, only limited stock remains in the central warehouse.",bacfb3d00b1f9163ce9ff57f43b7a3a6,SAP-100007
+HOM-008,Decor M008,Hooli,Decor,421.59,Supplier H,"Standard catalog product, ships from the central distribution center within two business days.",60e7a113ec1b8ca1f91e1d4c1ff49b78,SAP-100008
+SPO-009,Fitness M009,Vanta,Fitness,84.74,Supplier I,"Imported item, refer to the supplier datasheet for full specifications and warranty terms.",9e574f7aa0ee89aed453dd324b0dbb41,SAP-100009
+SPO-010,Outdoor M010,Lumen,Outdoor,798.62,Supplier J,"One of the stronger sellers in its category, frequently bundled with accessories at checkout.",b45ed1f03139d32c93cd59bf5c941cf0,SAP-100010
+SPO-011,Team M011,Acme,Team,76.56,Supplier K,"Older catalog line being phased out, only limited stock remains in the central warehouse.",4a15544dc5e7ce8a3a578a8ea9488d99,SAP-100011
+BEA-012,Skincare M012,Globex,Skincare,886.92,Supplier L,"Standard catalog product, ships from the central distribution center within two business days.",19db3ad0ddd1dfb23b982ef8daf61a26,SAP-100012
+BEA-013,Makeup M013,Initech,Makeup,351.41,Supplier M,"Imported item, refer to the supplier datasheet for full specifications and warranty terms.",5d65a441d58842dea2bc372f7412b293,SAP-100013
+BEA-014,Fragrance M014,Umbra,Fragrance,158.95,Supplier N,"One of the stronger sellers in its category, frequently bundled with accessories at checkout.",4458a885ab9099a435a240ae5af30553,SAP-100014
+IND-015,Tools M015,Stark,Tools,636.11,Supplier O,"Older catalog line being phased out, only limited stock remains in the central warehouse.",9bf0027312476f57a5e5a5abaefcfad8,SAP-100015
+IND-016,Safety M016,Wayne,Safety,576.96,Supplier A,"Standard catalog product, ships from the central distribution center within two business days.",29d4beef3eabedcbbaa80dd488bd6407,SAP-100016
+IND-017,Fasteners M017,Soylent,Fasteners,424.1,Supplier B,"Imported item, refer to the supplier datasheet for full specifications and warranty terms.",a3d70628ece66fa2fd5166e6451b4cf3,SAP-100017
+ELE-018,Phones M018,Hooli,Phones,624.02,Supplier C,"One of the stronger sellers in its category, frequently bundled with accessories at checkout.",d7c524a55304317faf42e12f3838b326,SAP-100018
+ELE-019,Laptops M019,Vanta,Laptops,694.96,Supplier D,"Older catalog line being phased out, only limited stock remains in the central warehouse.",0837b8a3d261a7ab3aa2e4f90e51f30d,SAP-100019
+ELE-020,Audio M020,Lumen,Audio,727.47,Supplier E,"Standard catalog product, ships from the central distribution center within two business days.",3602f8ac10f1bc81448aaa9e66b2bc5b,SAP-100020
+APP-021,Mens M021,Acme,Mens,823.13,Supplier F,"Imported item, refer to the supplier datasheet for full specifications and warranty terms.",508ebad7b7c93acfe059a0ee9132b63e,SAP-100021
+APP-022,Womens M022,Globex,Womens,203.17,Supplier G,"One of the stronger sellers in its category, frequently bundled with accessories at checkout.",ea1fca65e27a984d654821d07fcd9eb1,SAP-100022
+APP-023,Kids M023,Initech,Kids,583.92,Supplier H,"Older catalog line being phased out, only limited stock remains in the central warehouse.",3f22faf823bed01d43cf2fde24933b83,SAP-100023
+HOM-024,Kitchen M024,Umbra,Kitchen,674.32,Supplier I,"Standard catalog product, ships from the central distribution center within two business days.",95a76d79bf3c4c06434308bc89fa6a68,SAP-100024
+HOM-025,Furniture M025,Stark,Furniture,394.16,Supplier J,"Imported item, refer to the supplier datasheet for full specifications and warranty terms.",382567b85cabcc97663f1c97956269f0,SAP-100025
+HOM-026,Decor M026,Wayne,Decor,897.63,Supplier K,"One of the stronger sellers in its category, frequently bundled with accessories at checkout.",1745d6d87e570ddf827050a82369b584,SAP-100026
+SPO-027,Fitness M027,Soylent,Fitness,683.87,Supplier L,"Older catalog line being phased out, only limited stock remains in the central warehouse.",a0a04dc427209bdf1c11f735dc713d96,SAP-100027
+SPO-028,Outdoor M028,Hooli,Outdoor,156.58,Supplier M,"Standard catalog product, ships from the central distribution center within two business days.",10435a1098ae43346c12ace8ae340454,SAP-100028
+SPO-029,Team M029,Vanta,Team,355.52,Supplier N,"Imported item, refer to the supplier datasheet for full specifications and warranty terms.",877409a977d21e02ff01cf99988c24c9,SAP-100029
+BEA-030,Skincare M030,Lumen,Skincare,237.5,Supplier O,"One of the stronger sellers in its category, frequently bundled with accessories at checkout.",02f06b90f143262fdc5c0eed8da0365b,SAP-100030
+BEA-031,Makeup M031,Acme,Makeup,617.05,Supplier A,"Older catalog line being phased out, only limited stock remains in the central warehouse.",8976e334e2817efdae8492171d53434b,SAP-100031
+BEA-032,Fragrance M032,Globex,Fragrance,679.53,Supplier B,"Standard catalog product, ships from the central distribution center within two business days.",1c8eaee95715bd6fa4161293c4c2e2e3,SAP-100032
+IND-033,Tools M033,Initech,Tools,274.75,Supplier C,"Imported item, refer to the supplier datasheet for full specifications and warranty terms.",f42d47cc00d4af5974273ca3287d06ca,SAP-100033
+IND-034,Safety M034,Umbra,Safety,654.05,Supplier D,"One of the stronger sellers in its category, frequently bundled with accessories at checkout.",8026695ff8cda88b436d76e2b83cfe0b,SAP-100034
+IND-035,Fasteners M035,Stark,Fasteners,689.34,Supplier E,"Older catalog line being phased out, only limited stock remains in the central warehouse.",deda4e161b3dbd5ce9a1fa6f81f76d1c,SAP-100035
+ELE-036,Phones M036,Wayne,Phones,568.39,Supplier F,"Standard catalog product, ships from the central distribution center within two business days.",9be578c781f631d4a39231a7d777a477,SAP-100036
+ELE-037,Laptops M037,Soylent,Laptops,191.04,Supplier G,"Imported item, refer to the supplier datasheet for full specifications and warranty terms.",8a14be62295b4715c333e8615fb8d16c,SAP-100037
+ELE-038,Audio M038,Hooli,Audio,858.85,Supplier H,"One of the stronger sellers in its category, frequently bundled with accessories at checkout.",00257ad1eb2263dd87c5421eec24a3c5,SAP-100038
+APP-039,Mens M039,Vanta,Mens,545.07,Supplier I,"Older catalog line being phased out, only limited stock remains in the central warehouse.",edd968311ca35cfb04fc6d827d154385,SAP-100039
+APP-040,Womens M040,Lumen,Womens,336.24,Supplier J,"Standard catalog product, ships from the central distribution center within two business days.",4eb93effce88cb2dd4e80839fc3e058b,SAP-100040
+APP-041,Kids M041,Acme,Kids,226.92,Supplier K,"Imported item, refer to the supplier datasheet for full specifications and warranty terms.",f26b4776913e4de2e0c53cb83da9c2a9,SAP-100041
+HOM-042,Kitchen M042,Globex,Kitchen,84.7,Supplier L,"One of the stronger sellers in its category, frequently bundled with accessories at checkout.",11b7e948d0e6e6607c69dee1bb5e4bcf,SAP-100042
+HOM-043,Furniture M043,Initech,Furniture,880.52,Supplier M,"Older catalog line being phased out, only limited stock remains in the central warehouse.",20de435d2031d750c40db9b4885f6e66,SAP-100043
+HOM-044,Decor M044,Umbra,Decor,598.88,Supplier N,"Standard catalog product, ships from the central distribution center within two business days.",43dac0432a45c2ab8cbfedb0f264accc,SAP-100044
+SPO-045,Fitness M045,Stark,Fitness,481.99,Supplier O,"Imported item, refer to the supplier datasheet for full specifications and warranty terms.",36386821f6e07cc06c52c49f9b49bd26,SAP-100045
+SPO-046,Outdoor M046,Wayne,Outdoor,837.09,Supplier A,"One of the stronger sellers in its category, frequently bundled with accessories at checkout.",337ea2dfb09b2a5cbadcc32ac1590f53,SAP-100046
+SPO-047,Team M047,Soylent,Team,645.96,Supplier B,"Older catalog line being phased out, only limited stock remains in the central warehouse.",a65e688eabf3ad39fec21bbe66245bfa,SAP-100047
+BEA-048,Skincare M048,Hooli,Skincare,345.48,Supplier C,"Standard catalog product, ships from the central distribution center within two business days.",1efa21977394988f847fd9b4e64d1bcb,SAP-100048
+BEA-049,Makeup M049,Vanta,Makeup,234.4,Supplier D,"Imported item, refer to the supplier datasheet for full specifications and warranty terms.",969b666205628059568cc69b1064005c,SAP-100049
+BEA-050,Fragrance M050,Lumen,Fragrance,505.22,Supplier E,"One of the stronger sellers in its category, frequently bundled with accessories at checkout.",122c9a5601d7425638602ab696a402f2,SAP-100050
+IND-051,Tools M051,Acme,Tools,641.44,Supplier F,"Older catalog line being phased out, only limited stock remains in the central warehouse.",e7c99b26114125c63a9bedd40f1259e0,SAP-100051
+IND-052,Safety M052,Globex,Safety,42.8,Supplier G,"Standard catalog product, ships from the central distribution center within two business days.",3ceddf2d839fbc501223b5135496f63c,SAP-100052
+IND-053,Fasteners M053,Initech,Fasteners,261.45,Supplier H,"Imported item, refer to the supplier datasheet for full specifications and warranty terms.",21df306f8a0b3c3336d8393a7c441fe7,SAP-100053
+ELE-054,Phones M054,Umbra,Phones,655.17,Supplier I,"One of the stronger sellers in its category, frequently bundled with accessories at checkout.",7900f7f993829b43922fe15ae1e3db63,SAP-100054
+ELE-055,Laptops M055,Stark,Laptops,230.05,Supplier J,"Older catalog line being phased out, only limited stock remains in the central warehouse.",30beb45f683514f2ceb81f9d7914c120,SAP-100055
+ELE-056,Audio M056,Wayne,Audio,98.48,Supplier K,"Standard catalog product, ships from the central distribution center within two business days.",6c6fa6115ab33edf6e595ed3a8b317fa,SAP-100056
+APP-057,Mens M057,Soylent,Mens,378.83,Supplier L,"Imported item, refer to the supplier datasheet for full specifications and warranty terms.",ac619e630dde29a6baa4b71add2467ac,SAP-100057
+APP-058,Womens M058,Hooli,Womens,593.31,Supplier M,"One of the stronger sellers in its category, frequently bundled with accessories at checkout.",6712303a0f844fef1931e9eea56c0941,SAP-100058
+APP-059,Kids M059,Vanta,Kids,659.47,Supplier N,"Older catalog line being phased out, only limited stock remains in the central warehouse.",3fa7f1041bf90e27dc96925eccf3a171,SAP-100059
+HOM-060,Kitchen M060,Lumen,Kitchen,184.56,Supplier O,"Standard catalog product, ships from the central distribution center within two business days.",6c006f6123e2fcb472d8567d894a05e4,SAP-100060
+ELE-901,Audio M020,,Audio,,,,,SAP-099001
+HOM-902,Kitchen M006,,Kitchen,,,,,SAP-099002
+ZZZ-000,DO NOT USE,TEST,TEST,0.0,TEST,"Test product, exclude from the model.",,

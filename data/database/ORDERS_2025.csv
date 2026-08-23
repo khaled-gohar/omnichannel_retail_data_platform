@@ -1,0 +1,41 @@
+OrderID,LegacyRef,CustomerName,CustomerCity,RegionName,ShipToCity,BillToCity,OrderDate,OrderChannel,Status,Priority,OrderTotal,OrderNotes,GiftMessage,SourceFile
+ORD00005,LR-ORD00005,Momentum Holdings,Berlin,Europe,Buenos Aires,Buenos Aires,2025-04-12 18:41:21,10,Shipped,Standard,8071.84,,,orders_export_2025.csv
+ORD00007,LR-ORD00007,Pioneer Holdings,Toronto,North America,Tokyo,Chicago,2025-03-23 07:16:13,30,Shipped,Express,11223.66,"Fragile items on this order, add extra padding and mark the box clearly.",,orders_export_2025.csv
+ORD00008,LR-ORD00008,Summit Commerce,Riyadh,Middle East,Dubai,London,2025-11-05 08:03:15,40,Delivered,Express,18761.36,,,orders_export_2025.csv
+ORD00010,LR-ORD00010,Beacon Group,Cairo,Middle East,Singapore,Singapore,2025-12-28 10:36:26,20,Delivered,Standard,6702.64,"Partial backorder is possible, keep the customer updated on remaining stock.",,orders_export_2025.csv
+ORD00014,LR-ORD00014,Evergreen Partners,Amsterdam,Europe,Cairo,Toronto,2025-12-13 17:11:53,20,Delivered,Express,2182.41,,,orders_export_2025.csv
+ORD00017,LR-ORD00017,Atlas Holdings,Madrid,Europe,Istanbul,Sydney,2025-12-06 11:07:51,10,Delivered,Express,12057.09,,,orders_export_2025.csv
+ORD00019,LR-ORD00019,Quantum Distribution,Berlin,Europe,Sao Paulo,Riyadh,2025-03-26 18:27:05,30,Delivered,Standard,7412.85,"Fragile items on this order, add extra padding and mark the box clearly.",,orders_export_2025.csv
+ORD00020,LR-ORD00020,Vanguard Holdings,Toronto,North America,New York,New York,2025-03-23 12:42:18,40,Delivered,Express,12442.74,,,orders_export_2025.csv
+ORD00021,LR-ORD00021,Vertex Supply,Chicago,North America,Madrid,Los Angeles,2025-02-13 18:55:58,10,Delivered,Express,1696.4,"VIP account, expedite handling and notify the account manager once it ships.",,orders_export_2025.csv
+ORD00025,LR-ORD00025,Keystone Commerce,Mumbai,Asia Pacific,Buenos Aires,Buenos Aires,2025-05-21 15:23:25,10,Delivered,Express,3367.5,"Fragile items on this order, add extra padding and mark the box clearly.",,orders_export_2025.csv
+ORD00026,LR-ORD00026,Orbit Holdings,Istanbul,Middle East,Toronto,Cairo,2025-07-10 14:33:24,20,Shipped,Standard,4781.84,,,orders_export_2025.csv
+ORD00028,LR-ORD00028,Pioneer Partners,Buenos Aires,Latin America,Dubai,London,2025-03-17 14:11:57,40,Delivered,Standard,7760.81,"Partial backorder is possible, keep the customer updated on remaining stock.",,orders_export_2025.csv
+ORD00030,LR-ORD00030,Meridian Commerce,Dubai,Middle East,Singapore,Singapore,2025-05-05 10:50:08,20,Delivered,Express,7254.16,Customer requested delivery before noon; confirm the slot by phone the day before.,,orders_export_2025.csv
+ORD00034,LR-ORD00034,Quantum Supply,Amsterdam,Europe,Cairo,Toronto,2025-02-26 08:33:09,20,Delivered,Standard,953.7,"Partial backorder is possible, keep the customer updated on remaining stock.",,orders_export_2025.csv
+ORD00035,LR-ORD00035,Momentum Group,Berlin,Europe,Berlin,Berlin,2025-10-18 08:16:12,30,Delivered,Express,727.47,,,orders_export_2025.csv
+ORD00036,LR-ORD00036,Evergreen Partners,Amsterdam,Europe,Mumbai,Amsterdam,2025-04-06 15:41:10,40,Delivered,Standard,9698.77,Customer requested delivery before noon; confirm the slot by phone the day before.,,orders_export_2025.csv
+ORD00041,LR-ORD00041,Pinnacle Commerce,London,Europe,Madrid,Los Angeles,2025-07-28 12:38:09,10,Delivered,Express,3884.28,,,orders_export_2025.csv
+ORD00043,LR-ORD00043,Summit Commerce,Riyadh,Middle East,Chicago,Tokyo,2025-05-25 08:03:18,30,Processing,Express,3410.34,"Fragile items on this order, add extra padding and mark the box clearly.",,orders_export_2025.csv
+ORD00044,LR-ORD00044,Summit Commerce,Riyadh,Middle East,Amsterdam,Mumbai,2025-06-13 12:59:36,40,Delivered,Standard,2526.1,,,orders_export_2025.csv
+ORD00047,LR-ORD00047,Pioneer Partners,Buenos Aires,Latin America,Tokyo,Chicago,2025-04-21 13:08:56,30,Delivered,Express,3637.35,,,orders_export_2025.csv
+ORD00048,LR-ORD00048,Zenith Holdings,Sydney,Asia Pacific,Dubai,London,2025-02-22 16:35:12,40,Delivered,Express,7709.68,Customer requested delivery before noon; confirm the slot by phone the day before.,,orders_export_2025.csv
+ORD00050,LR-ORD00050,Vertex Logistics,Istanbul,Middle East,Singapore,Singapore,2025-12-14 15:23:48,20,Delivered,Express,475.0,,,orders_export_2025.csv
+ORD00051,LR-ORD00051,Nova Retail,Sydney,Asia Pacific,Riyadh,Sao Paulo,2025-05-21 18:21:51,30,Delivered,Express,4411.86,"VIP account, expedite handling and notify the account manager once it ships.",,orders_export_2025.csv
+ORD00052,LR-ORD00052,Keystone Distribution,Madrid,Europe,London,Dubai,2025-12-02 16:20:10,40,Delivered,Express,2510.9,"Partial backorder is possible, keep the customer updated on remaining stock.",,orders_export_2025.csv
+ORD00054,LR-ORD00054,Horizon Supply,Madrid,Europe,Cairo,Toronto,2025-04-23 13:37:19,20,Shipped,Standard,12095.11,Customer requested delivery before noon; confirm the slot by phone the day before.,,orders_export_2025.csv
+ORD00057,LR-ORD00057,Catalyst Distribution,Sao Paulo,Latin America,Istanbul,Sydney,2025-07-15 07:28:20,10,Delivered,Express,6507.4,"VIP account, expedite handling and notify the account manager once it ships.",,orders_export_2025.csv
+ORD00059,LR-ORD00059,Vanguard Logistics,Los Angeles,North America,Sao Paulo,Riyadh,2025-11-29 17:30:33,30,Delivered,Standard,10298.68,,,orders_export_2025.csv
+ORD00060,LR-ORD00060,Evergreen Partners,Amsterdam,Europe,New York,New York,2025-12-29 17:49:55,40,Delivered,Express,10185.01,Customer requested delivery before noon; confirm the slot by phone the day before.,,orders_export_2025.csv
+ORD00061,LR-ORD00061,Summit Commerce,Riyadh,Middle East,Madrid,Los Angeles,2025-10-13 15:19:14,10,Processing,Express,2909.98,"Fragile items on this order, add extra padding and mark the box clearly.",,orders_export_2025.csv
+ORD00062,LR-ORD00062,Evergreen Group,Paris,Europe,Mexico City,Paris,2025-10-23 18:13:44,20,Delivered,Express,2108.46,,,orders_export_2025.csv
+ORD00063,LR-ORD00063,Cascade Retail,Cairo,Middle East,Chicago,Tokyo,2025-10-08 11:07:36,30,Delivered,Express,10290.89,"VIP account, expedite handling and notify the account manager once it ships.",,orders_export_2025.csv
+ORD00064,LR-ORD00064,Zenith Distribution,Paris,Europe,Amsterdam,Mumbai,2025-02-13 11:45:05,40,Delivered,Express,764.16,"Partial backorder is possible, keep the customer updated on remaining stock.",,orders_export_2025.csv
+ORD00066,LR-ORD00066,Summit Retail,Cairo,Middle East,Toronto,Cairo,2025-09-03 10:03:42,20,Shipped,Standard,3181.2,Customer requested delivery before noon; confirm the slot by phone the day before.,,orders_export_2025.csv
+ORD00069,LR-ORD00069,Catalyst Industries,Singapore,Asia Pacific,Los Angeles,Madrid,2025-04-02 17:36:14,10,Delivered,Standard,13570.42,"VIP account, expedite handling and notify the account manager once it ships.",,orders_export_2025.csv
+ORD00070,LR-ORD00070,Cascade Retail,Cairo,Middle East,Singapore,Singapore,2025-02-07 13:50:31,20,Delivered,Express,18911.31,"Partial backorder is possible, keep the customer updated on remaining stock.",,orders_export_2025.csv
+ORD00072,LR-ORD00072,Zenith Logistics,Amsterdam,Europe,London,Dubai,2025-07-17 19:07:21,40,Delivered,Express,7741.6,Customer requested delivery before noon; confirm the slot by phone the day before.,,orders_export_2025.csv
+ORD00073,LR-ORD00073,Orbit Holdings,Istanbul,Middle East,Sydney,Istanbul,2025-12-12 19:18:36,10,Delivered,Standard,9219.63,"Fragile items on this order, add extra padding and mark the box clearly.",,orders_export_2025.csv
+ORD00075,LR-ORD00075,Momentum Holdings,Berlin,Europe,Berlin,Berlin,2025-09-12 07:16:24,30,Delivered,Express,4375.08,"VIP account, expedite handling and notify the account manager once it ships.",,orders_export_2025.csv
+ORD00077,LR-ORD00077,Cascade Partners,Riyadh,Middle East,Istanbul,Sydney,2025-06-13 13:43:32,10,Processing,Express,10190.13,,,orders_export_2025.csv
+ORD00078,LR-ORD00078,Evergreen Supply,Mumbai,Asia Pacific,Paris,Mexico City,2025-05-01 17:58:18,20,Delivered,Standard,261.45,Customer requested delivery before noon; confirm the slot by phone the day before.,,orders_export_2025.csv
