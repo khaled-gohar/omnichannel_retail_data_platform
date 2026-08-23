@@ -48,3 +48,7 @@ Thumbs.db
 .env.*
 *.env
 *.private.yaml
+
+# Project data
+data/
+
