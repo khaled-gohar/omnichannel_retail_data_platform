@@ -1,0 +1,20 @@
+tables:
+
+  campaign_log:
+    path: s3://walmartrawdata/campaign_log/
+
+  campaign_skus:
+    path: s3://walmartrawdata/campaign_skus/
+
+  exchange_rates:
+    path: s3://walmartrawdata/exchange_rates/
+
+  inventory:
+    path: s3://walmartrawdata/inventory/
+
+  sales_targets:
+    path: s3://walmartrawdata/sales_targets/
+
+  security:
+    path: s3://walmartrawdata/security/
+
