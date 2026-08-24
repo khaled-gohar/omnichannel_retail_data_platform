@@ -8,9 +8,11 @@ authors = [
 ]
 requires-python = ">=3.14"
 dependencies = [
+    "dotenv>=0.9.9",
     "fastexcel>=0.21.0",
     "ipykernel>=7.3.0",
     "psycopg2>=2.9.12",
+    "pyyaml>=6.0.3",
 ]
 
 [project.scripts]
