@@ -6,14 +6,16 @@ readme = "README.md"
 authors = [
     { name = "Khaled Gohar", email = "khaledg.gohar@email.com" }
 ]
-requires-python = ">=3.14"
+requires-python = ">=3.11,<3.12"
 dependencies = [
-    "dotenv>=0.9.9",
+    "dbt-core>=1.12.3",
     "fastexcel>=0.21.0",
     "ipykernel>=7.3.0",
     "polars>=1.44.0",
     "psycopg2>=2.9.12",
     "pyyaml>=6.0.3",
+    "python-dotenv>=1.0.0",
+    "dbt-databricks>=1.10.9",
 ]
 
 [project.scripts]
