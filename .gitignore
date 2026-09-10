@@ -53,3 +53,13 @@ Thumbs.db
 # Project data
 data/
 
+#project starting folder
+omnichannel_retail/
+
+# Airflow and application logs
+logs/
+airflow/logs/
+*.log
+
+
+

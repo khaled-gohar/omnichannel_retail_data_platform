@@ -1,0 +1,1757 @@
+silver/api:
+cities.sql:
+
+{{
+    config(
+    materialized = 'table'
+    )
+}}
+
+WITH source_data as (
+
+    SELECT cityname as city_name, 
+           regionname as region_name       
+    
+    FROM {{ source('retail_databricks_bronze', 'api_cities') }}
+
+),
+    deduplicated as     (
+        SELECT * 
+        FROM source_data
+        qualify
+            row_number() over (
+                partition by city_name
+                order by city_name desc
+            ) = 1
+    ),
+
+    cleaned as (
+        select 
+            NULLIF(INITCAP(TRIM(city_name)),'') AS city_name,
+            NULLIF(INITCAP(TRIM(region_name)),'') AS region_name
+        from deduplicated
+    )
+
+SELECT *,
+        current_timestamp() as silver_process_at
+FROM cleaned
+
+
+shipments.sql:
+ 
+{{ 
+    config( 
+    materialized = 'incremental', 
+    unique_key = 'shipment_id' 
+    ) 
+}} 
+ 
+WITH source_data as ( 
+ 
+    SELECT  
+           shipmentid as shipment_id, 
+           orderid as order_id, 
+           shipdate as ship_date,  
+           deliverydate as delivery_date,              
+           shipmode as ship_mode          
+     
+    FROM {{ source('retail_databricks_bronze', 'api_shipments') }} 
+ 
+), 
+    deduplicated as ( 
+        SELECT  
+            *  
+        from source_data 
+        qualify 
+            row_number() over ( 
+                partition by shipment_id 
+                order by ship_date desc 
+            ) = 1 
+    ), 
+    cleaned as ( 
+        SELECT  
+            CAST(shipment_id AS STRING) AS shipment_id, 
+            CAST(order_id AS STRING) AS order_id, 
+            TRY_CAST(NULLIF(TRIM(ship_date), '') AS DATE) AS ship_date, 
+            TRY_CAST(NULLIF(TRIM(delivery_date), '') AS DATE) AS delivery_date, 
+            NULLIF(INITCAP(TRIM(ship_mode)),'') AS ship_mode 
+        FROM deduplicated 
+    ), 
+    max_date as ( 
+        select  coalesce(max(ship_date), '1900-01-01') as ship_date 
+        from cleaned 
+    ) 
+ 
+ 
+SELECT *, 
+        current_timestamp() as silver_process_at 
+FROM cleaned 
+ 
+{% if is_incremental() %} 
+  where  ship_date > (select ship_date from max_date) 
+{% endif %} 
+ 
+subcategories.sql:
+
+
+{{
+    config(
+    materialized = 'table'
+    )
+}}
+
+WITH source_data as (
+
+    SELECT categorysubcategory        
+    
+    FROM {{ source('retail_databricks_bronze', 'api_subcategories') }}
+
+),
+    deduplicated as (
+
+        SELECT * 
+        FROM source_data
+        qualify
+            row_number() over (
+                partition by categorysubcategory
+                order by categorysubcategory desc
+            ) = 1
+
+    ),
+
+    cleaned as (
+
+    SELECT 
+        INITCAP(NULLIF(TRIM(SPLIT(categorysubcategory, '\\|')[0]), '')) AS category_name,
+        INITCAP(NULLIF(TRIM(SPLIT(categorysubcategory, '\\|')[1]), '')) AS subcategory_name  
+    FROM deduplicated    
+)
+
+SELECT *,
+        current_timestamp() as silver_process_at 
+FROM cleaned
+
+
+silveder/postgresql:
+
+address.sql:
+{{
+    config(
+        materialized = 'table'
+    )
+}}
+
+WITH source_data AS (
+
+    SELECT
+        addressid,
+        street,
+        cityname
+    FROM {{ source('retail_databricks_bronze', 'address') }}
+
+    ),
+
+    deduplicated AS (
+
+        SELECT
+            addressid,
+            street,
+            cityname
+
+        FROM source_data
+
+        QUALIFY ROW_NUMBER() OVER (
+            PARTITION BY addressid
+            ORDER BY addressid
+        ) = 1
+
+    ),
+
+    cleaned as ( 
+        SELECT 
+            CAST(addressid AS STRING) AS address_id,
+            NULLIF(TRIM(street), '') AS street_name,
+            NULLIF(TRIM(cityname), '') AS city_name
+        FROM deduplicated
+    )
+
+SELECT
+    address_id,
+    street_name,
+    city_name,
+    CURRENT_TIMESTAMP() AS silver_process_at
+
+FROM cleaned
+
+custmer_master.sql:
+ 
+{{ 
+    config( 
+    materialized = 'table' 
+    ) 
+}} 
+ 
+WITH source_data as ( 
+ 
+    SELECT customerid as customer_id,  
+           customername as customer_name,  
+           segment as customer_segment,  
+           addressid as address_id,  
+           accountmanager as account_manager,  
+           paymentterms as payment_terms 
+     
+    FROM {{ source('retail_databricks_bronze', 'cust_master') }} 
+    WHERE customerid != '9999' 
+ 
+    ), 
+    deduplicated as ( 
+        SELECT * 
+        FROM source_data 
+        QUALIFY ROW_NUMBER() OVER ( 
+            PARTITION BY customer_id 
+            ORDER BY customer_id desc 
+        ) = 1  
+    ), 
+ 
+    cleaned as ( 
+        SELECT  
+            CAST(customer_id AS STRING) AS customer_id, 
+            NULLIF(INITCAP(TRIM(customer_name)), '') AS customer_name, 
+            NULLIF(INITCAP(TRIM(customer_segment)), '') AS customer_segment, 
+            CAST(address_id AS STRING) AS address_id, 
+            NULLIF(INITCAP(TRIM(account_manager)), '') AS account_manager, 
+            NULLIF(INITCAP(TRIM(payment_terms)), '') AS payment_terms 
+     
+        FROM deduplicated 
+    )    
+ 
+ 
+SELECT  customer_id,  
+        customer_name,  
+        customer_segment,  
+        address_id,  
+        account_manager,  
+        payment_terms, 
+        current_timestamp() as silver_process_at  
+FROM cleaned 
+ 
+customer_contacts.sql:
+
+{{
+    config(
+        materialized = 'incremental',
+        unique_key = 'customer_id'
+    )
+}}
+
+WITH source_data AS (
+
+    SELECT
+        customerid AS customer_id,
+        contactname AS contact_name,
+        email AS email_address,
+        isprimary AS is_primary
+
+    FROM {{ source('retail_databricks_bronze', 'customer_contacts') }}
+
+    ),
+
+    cleaned AS (
+
+        SELECT
+            CAST(customer_id AS STRING) AS customer_id,
+            NULLIF(TRIM(contact_name), '') AS contact_name,
+            LOWER(NULLIF(TRIM(email_address), '')) AS email_address,
+            UPPER(is_primary) AS is_primary
+
+        FROM source_data
+        WHERE is_primary = "true" 
+
+    )
+
+SELECT *,current_timestamp() as silver_process_at
+FROM cleaned
+
+
+invoice_lines.sql:
+ 
+{{ 
+    config( 
+    materialized = 'table' 
+    ) 
+}} 
+ 
+WITH source_data as ( 
+ 
+    SELECT invoicelineid as invoice_line_id,  
+           invoiceid as invoice_id,  
+           productname as product_name,  
+           amount       
+     
+    FROM {{ source('retail_databricks_bronze', 'invoice_lines') }} 
+ 
+    ), 
+ 
+    deduplicated AS ( 
+         
+        SELECT 
+            invoice_line_id, 
+            invoice_id, 
+            product_name, 
+            amount 
+             
+        FROM source_data 
+         
+        QUALIFY 
+            ROW_NUMBER() OVER ( 
+                PARTITION BY invoice_line_id 
+                ORDER BY invoice_line_id DESC 
+            ) = 1 
+ 
+    ), 
+ 
+    cleaned as ( 
+        SELECT 
+            CAST(invoice_line_id AS STRING) AS invoice_line_id, 
+            CAST(invoice_id AS STRING) AS invoice_id, 
+            NULLIF(TRIM(product_name), '') AS product_name, 
+            CAST(amount AS DECIMAL(10,2)) AS amount 
+        FROM deduplicated 
+    ) 
+ 
+SELECT *, 
+           current_timestamp() as silver_process_at    
+FROM cleaned 
+ 
+ 
+invoices.sql:
+
+
+{{
+    config(
+    materialized = 'incremental',
+    unique_key = 'invoice_id'
+    )
+}}
+
+WITH source_data as (
+
+    SELECT invoiceid as invoice_id, 
+           orderid as order_id, 
+           customername as customer_name, 
+           invoicedate as invoice_date, 
+           amount        
+    
+    FROM {{ source('retail_databricks_bronze', 'invoices') }}
+
+    ),
+
+    deduplicated AS (
+        
+        SELECT
+            invoice_id,
+            order_id,
+            customer_name,
+            invoice_date,
+            amount
+            
+        FROM source_data
+        
+        QUALIFY
+            ROW_NUMBER() OVER (
+                PARTITION BY invoice_id
+                ORDER BY invoice_date DESC
+            ) = 1
+
+    ),
+
+    cleaned as (
+        SELECT
+            CAST(invoice_id AS STRING) AS invoice_id,
+            CAST(order_id AS STRING) AS order_id,
+            NULLIF(TRIM(customer_name), '') AS customer_name,
+            invoice_date,
+            CAST(amount AS DECIMAL(10,2)) AS amount
+        FROM deduplicated
+    ),
+    max_date as (
+        select  coalesce(max(invoice_date), '1900-01-01') as invoice_date
+        from cleaned
+    )
+
+SELECT *,
+        current_timestamp() as silver_process_at 
+FROM cleaned
+
+{% if is_incremental() %}
+  where  invoice_date > (select invoice_date from max_date)
+{% endif %}
+
+
+order_line_items.sql:
+
+{{
+    config(
+    materialized = 'table'
+    )
+}}
+
+WITH source_data as (
+
+    SELECT lineid as line_id, 
+           orderid as order_id, 
+           productname as product_name, 
+           quantity, 
+           unitprice as unit_price, 
+           unitcost as unit_cost, 
+           discountpct as discount_pct, 
+           linetotal as line_total   
+    
+    FROM {{ source('retail_databricks_bronze', 'order_line_items') }}
+
+    ),
+
+    deduplicated AS (
+        
+        SELECT
+        *
+        FROM source_data
+        
+        QUALIFY
+            ROW_NUMBER() OVER (
+                PARTITION BY line_id
+                ORDER BY line_id DESC
+            ) = 1
+
+    ),
+
+    cleaned as (
+        SELECT
+            CAST(line_id AS STRING) AS line_id,
+            CAST(order_id AS STRING) AS order_id,
+            NULLIF(INITCAP(TRIM(product_name)), '') AS product_name,
+            CAST(quantity AS INTEGER) AS quantity,
+            CAST(unit_price AS DECIMAL(10,2)) AS unit_price,
+            CAST(unit_cost AS DECIMAL(10,2)) AS unit_cost,
+            CAST(discount_pct AS DECIMAL(5,2)) AS discount_pct,
+            CAST(line_total AS DECIMAL(10,2)) AS line_total
+        FROM deduplicated
+    )
+
+SELECT  *
+, current_timestamp() as silver_process_at      
+FROM cleaned
+
+
+orders.sql:
+ 
+{{ 
+    config( 
+    materialized = 'incremental', 
+    unique_key = 'order_id' 
+    ) 
+}} 
+ 
+WITH source_data as ( 
+ 
+    SELECT orderid as order_id,  
+           customername as customer_name,  
+           customercity as customer_city,  
+           regionname as region_name,  
+           shiptocity as ship_to_city,  
+           billtocity as bill_to_city,  
+           orderdate as order_date,  
+           orderchannel as order_channel,  
+           status as order_status,  
+           priority as order_priority,  
+           ordertotal as order_total,  
+           ordernotes as order_notes,  
+           giftmessage as gift_message          
+     
+    FROM {{ source('retail_databricks_bronze', 'orders') }} 
+ 
+) 
+ 
+    ,deduplicated   as ( 
+        select 
+        * 
+        from source_data 
+         
+        qualify 
+            row_number() over ( 
+                partition by order_id 
+                order by order_id desc 
+            ) = 1 
+    ) 
+ 
+    , cleaned as ( 
+        select 
+            CAST(order_id AS STRING) AS order_id, 
+            NULLIF(TRIM(customer_name), '') AS customer_name, 
+            NULLIF(INITCAP(TRIM(customer_city)), '') AS customer_city, 
+            NULLIF(INITCAP(TRIM(region_name)), '') AS region_name, 
+            NULLIF(INITCAP(TRIM(ship_to_city)), '') AS ship_to_city, 
+            NULLIF(INITCAP(TRIM(bill_to_city)), '') AS bill_to_city, 
+            CAST(order_date AS timestamp) AS order_date, 
+            NULLIF(TRIM(order_channel), '') AS order_channel, 
+            NULLIF(TRIM(order_status), '') AS order_status, 
+            NULLIF(TRIM(order_priority), '') AS order_priority, 
+            CAST(order_total AS DECIMAL(10,2)) AS order_total, 
+            NULLIF(TRIM(order_notes), '') AS order_notes 
+        from deduplicated 
+    ), 
+    max_date as ( 
+        select  coalesce(max(order_date), '1900-01-01') as order_date 
+        from cleaned 
+    ) 
+ 
+SELECT *, 
+           current_timestamp() as silver_process_at 
+FROM cleaned 
+ 
+ 
+{% if is_incremental() %} 
+  where  order_date > (select order_date from max_date) 
+{% endif %} 
+ 
+payments.sql:
+ 
+{{ 
+    config( 
+    materialized = 'incremental', 
+    unique_key = 'payment_id' 
+    ) 
+}} 
+ 
+WITH source_data as ( 
+ 
+    SELECT paymentid as payment_id,  
+           invoiceid as invoice_id,  
+           customername as customer_name,  
+           paydate as payment_date,  
+           amount        
+     
+    FROM {{ source('retail_databricks_bronze', 'payments') }} 
+ 
+    ) 
+ 
+    ,deduplicated as ( 
+        select * 
+        from source_data 
+        qualify  
+            row_number() over ( 
+                partition by payment_id 
+                order by payment_date desc 
+            ) = 1 
+    ) 
+ 
+    ,cleaned as ( 
+        select 
+            CAST(payment_id AS STRING) AS payment_id, 
+            CAST(invoice_id AS STRING) AS invoice_id, 
+            NULLIF(TRIM(customer_name), '') AS customer_name, 
+            CAST(payment_date AS TIMESTAMP) AS payment_date, 
+            CAST(amount AS DECIMAL(10,2)) AS amount 
+        from deduplicated 
+    ), 
+    max_date as ( 
+        select  coalesce(max(payment_date), '1900-01-01') as invoice_date 
+        from cleaned 
+    ) 
+ 
+SELECT *,    
+    current_timestamp() as silver_process_at 
+FROM cleaned 
+ 
+{% if is_incremental() %} 
+  where  payment_date > (select payment_date from max_date) 
+{% endif %} 
+ 
+products.sql:
+
+ 
+{{ 
+    config( 
+    materialized = 'table' 
+    ) 
+}} 
+ 
+WITH source_data as ( 
+ 
+    SELECT productcode as product_id,  
+           productname as product_name,  
+           brand,  
+           subcategoryname as sub_category_name,  
+           unitprice as unit_price,  
+           primarysupplier as primary_supplier,  
+           productdescription as product_description    
+     
+    FROM {{ source('retail_databricks_bronze', 'products') }} 
+    WHERE productcode != 'ZZZ-000' AND unitprice IS NOT NULL 
+ 
+    ) 
+ 
+    ,deduplicated as ( 
+        select * 
+        from source_data 
+        qualify  
+            row_number() over ( 
+                partition by product_id 
+                order by product_id desc 
+            ) = 1 
+    ) 
+ 
+    ,cleaned as ( 
+        select 
+            CAST(product_id AS STRING) AS product_id, 
+            NULLIF(INITCAP(TRIM(product_name)), '') AS product_name, 
+            NULLIF(TRIM(brand), '') AS brand, 
+            NULLIF(TRIM(sub_category_name), '') AS subcategory_name, 
+            CAST(unit_price AS DECIMAL(10,2)) AS unit_price, 
+            NULLIF(TRIM(primary_supplier), '') AS primary_supplier, 
+            NULLIF(TRIM(product_description), '') AS product_description 
+        from deduplicated 
+    ) 
+ 
+SELECT * 
+        ,current_timestamp() as silver_process_at    
+FROM cleaned 
+ 
+ 
+user_details.sql:
+
+
+{{
+    config(
+    materialized = 'table'
+    )
+}}
+
+WITH source_data  as (
+
+    SELECT userid as customer_id, 
+           creditlimit as credit_limit, 
+           phone         
+    FROM {{ source('retail_databricks_bronze', 'user_details') }}
+
+  ),
+    deduplicated as (
+      SELECT * 
+      FROM source_data
+      qualify
+          row_number() over (
+              partition by customer_id
+              order by customer_id desc
+          ) = 1
+  ),
+    cleaned as (
+      select 
+          CAST(customer_id AS STRING) AS customer_id,
+          CAST(credit_limit AS DECIMAL(10,2)) AS credit_limit,
+          REPLACE(CAST(phone AS STRING),'-','') AS phone
+
+      from deduplicated
+    )
+
+SELECT *,
+        current_timestamp() as silver_process_at
+FROM  cleaned
+
+
+silver/s3:
+campaign_log.sql:
+
+{{
+    config(
+    materialized = 'incremental',
+    unique_key = 'campaign_log_key'
+    )
+}}
+
+WITH source_data as (
+
+    SELECT CampaignName, Channel, StartDate, EndDate, Budget, Date, Impressions, Clicks, Spend      
+    
+    FROM {{ source('retail_databricks_bronze', 'aws_s3_campaign_log') }}
+
+    ),
+
+    cleaned as (
+
+        SELECT 
+            INITCAP(TRIM(CampaignName)) as campaign_name,
+            INITCAP(TRIM(Channel)) as channel,
+            TO_DATE(TRIM(StartDate),"yyyy-MM-dd") as start_date,
+            TO_DATE(TRIM(EndDate),"yyyy-MM-dd") as end_date,
+            TRY_CAST(TRIM(Budget) AS DECIMAL(10, 2)) AS budget,
+            TO_DATE(TRIM(Date),"yyyy-MM-dd") as campaign_date,
+            TRY_CAST(TRIM(Impressions) AS INTEGER) AS impressions,
+            TRY_CAST(TRIM(Clicks) AS INTEGER) AS clicks,
+            TRY_CAST(TRIM(Spend) AS DECIMAL(10,2)) AS spend 
+        
+        FROM source_data
+
+    ),
+
+
+    deduplicated as (
+
+        SELECT *
+        FROM cleaned
+        qualify
+            row_number() over (
+                partition by campaign_name,channel,start_date,end_date,budget,campaign_date,impressions,clicks,spend 
+                order by campaign_name
+            ) = 1
+
+    ),
+
+    add_key as (
+        SELECT {{ generate_surrogate_key(['campaign_name', 'channel', 'start_date', 'end_date', 'campaign_date']) }} as campaign_log_key,*
+        FROM deduplicated
+    ),
+    max_date as (
+        select 
+            coalesce(max(campaign_date),date('1900-01-01')) as max_campaign_date
+        from add_key
+    )
+
+
+SELECT *,current_timestamp() as silver_process_at
+FROM add_key
+
+
+{% if is_incremental() %}
+  where  campaign_date > (select  max_campaign_date from max_date)
+{% endif %}
+
+
+campaign_skus.sql:
+
+{{
+    config(
+    materialized = 'table'
+    )
+}}
+
+WITH source_data as (
+
+    SELECT CampaignName, PromotedSKUs        
+    
+    FROM {{ source('retail_databricks_bronze', 'aws_s3_campaign_skus') }}
+
+    ),
+
+    cleaned as (
+
+        SELECT 
+            INITCAP(TRIM(CampaignName)) as campaign_name,
+            PromotedSKUs
+        FROM source_data
+
+    ),
+    
+    exploded_skus as (
+        SELECT campaign_name,TRIM(sku) AS product_id
+        FROM cleaned
+        LATERAL VIEW EXPLODE(
+            SPLIT(PromotedSKUs, ',')
+        ) exploded AS sku
+    )
+SELECT * ,current_timestamp() as silver_process_at
+FROM exploded_skus
+
+
+exchange_rates.sql:
+
+{{
+    config(
+    materialized = 'table'
+    )
+}}
+
+WITH source_data as (
+
+    SELECT Currency, Rate, Date        
+    
+    FROM {{ source('retail_databricks_bronze', 'aws_s3_exchange_rates') }}
+
+    ),
+    cleaned AS (
+
+        SELECT
+            UPPER(NULLIF(TRIM(Currency), '')) AS currency,
+
+            TRY_CAST(NULLIF(TRIM(Rate), '')AS DECIMAL(18, 6)) AS exchange_rate,
+
+            TRY_CAST(NULLIF(TRIM(Date), '')AS DATE) AS exchange_date
+
+        FROM source_data
+
+    )
+
+SELECT *, current_timestamp() as silver_process_at 
+FROM cleaned
+
+
+inventory.sql:
+{{
+    config(
+    materialized = 'incremental',
+    unique_key = 'inventory_key'
+    )
+}}
+
+WITH source_data AS (
+
+    SELECT
+        ProductName,
+        `2025-01`,
+        `2025-02`,
+        `2025-03`,
+        `2025-04`,
+        `2025-05`,
+        `2025-06`,
+        `2025-07`,
+        `2025-08`,
+        `2025-09`,
+        `2025-10`,
+        `2025-11`,
+        `2025-12`
+
+    FROM {{ source('retail_databricks_bronze', 'aws_s3_inventory') }}
+
+    ),
+
+    unpivot_table AS (
+
+        SELECT
+            ProductName AS product_name,
+            month,
+            value
+
+        FROM source_data
+
+        UNPIVOT (
+            value FOR month IN (
+                `2025-01`,
+                `2025-02`,
+                `2025-03`,
+                `2025-04`,
+                `2025-05`,
+                `2025-06`,
+                `2025-07`,
+                `2025-08`,
+                `2025-09`,
+                `2025-10`,
+                `2025-11`,
+                `2025-12`
+            )
+        )
+
+    ),
+
+    cleaned AS (
+
+        SELECT
+            NULLIF(INITCAP(TRIM(product_name)), '') AS product_name,
+            CAST(month AS date) as inventory_date,
+            TRY_CAST(NULLIF(TRIM(value), '') AS DECIMAL(18, 2)) AS inventory_quantity
+
+        FROM unpivot_table
+
+    ),
+    deduplicated as (
+        SELECT distinct *
+        FROM cleaned
+        --QUALIFY row_number() over(partition by product_name,inventory_date,inventory_quantity order by product_name,inventory_date) = 1  better to do distincit 
+    ),
+    add_key as (
+        SELECT  {{ generate_surrogate_key(['product_name','inventory_date']) }} as inventory_key,  
+                product_name,inventory_date,inventory_quantity
+        FROM deduplicated
+        
+    ),
+    max_date as (
+        select  coalesce(max(inventory_date), '1900-01-01') as inventory_date
+        from cleaned
+    )
+
+SELECT inventory_key,product_name,inventory_date,inventory_quantity
+       ,current_timestamp() AS silver_process_at
+
+FROM add_key
+
+
+{% if is_incremental() %}
+  where  inventory_date > (select inventory_date from max_date)
+{% endif %}
+
+
+
+sales_targets.sql:
+{{
+    config(
+    materialized = 'incremental',
+    unique_key = 'target_key'
+    )
+}}
+
+WITH source_data as (
+
+    SELECT {{generate_surrogate_key(['Period','TargetRevenue'])}} as target_key,
+           Period as target_date , TargetRevenue as target_revenue  
+    
+    FROM {{ source('retail_databricks_bronze', 'aws_s3_sales_targets') }}
+
+    ),
+    max_date as (
+        select  coalesce(max(target_date), '1900-01-01') as max_target_date
+        from source_data
+    )
+
+SELECT *,current_timestamp() as silver_process_at
+FROM source_data
+
+
+{% if is_incremental() %}
+  where  target_date > (select max_target_date from max_date)
+{% endif %}
+
+
+
+security.sql:
+
+{{
+    config(
+    materialized = 'table'
+    )
+}}
+
+WITH source_data as (
+
+    SELECT UserEmail, Region
+    
+    FROM {{ source('retail_databricks_bronze', 'aws_s3_security') }}
+
+)
+
+SELECT *,current_timestamp() as silver_process_at
+FROM source_data
+
+
+this is the silver layer only i will provide after the 
+
+
+
+
+gold/ephemeral:
+eph_customers.sql:
+SELECT 
+
+    cm.customer_id,
+
+    cm.customer_name,
+
+    cm.customer_segment,
+
+    cm.account_manager,
+
+    cm.payment_terms,
+
+    cc.contact_name,
+
+    cc.email_address,
+
+    ud.credit_limit,
+
+    ud.phone,
+
+    ad.street_name,
+
+    ad.city_name,
+
+    ct.region_name
+
+FROM {{ ref('custmer_master') }} AS cm
+
+LEFT JOIN {{ ref('customer_contacts') }} AS cc ON cm.customer_id = cc.customer_id
+
+LEFT JOIN {{ ref('user_details') }} AS ud ON cm.customer_id = ud.customer_id
+
+LEFT JOIN {{ ref('address') }} AS ad ON cm.address_id = ad.address_id
+
+LEFT JOIN {{ ref('cities') }} AS ct ON ad.city_name = ct.city_name
+
+eph_products.sql:
+
+SELECT 
+
+        pr.product_id,
+
+        pr.product_name,
+
+        pr.brand,
+
+        pr.subcategory_name,
+
+        sg.category_name,
+
+        pr.unit_price,
+
+        pr.primary_supplier
+
+FROM {{ ref('products') }} AS pr
+
+LEFT JOIN {{ ref('subcategories') }} AS sg ON pr.subcategory_name = sg.subcategory_name
+
+
+silver/dim:
+
+dim_customers.sql:
+
+{{
+
+    config(
+
+        materialized='table'
+
+    )
+
+}}
+
+
+SELECT 
+
+    customer_id,
+
+    customer_name,
+
+    customer_segment,
+
+    account_manager,
+
+    payment_terms,
+
+    contact_name,
+
+    email_address,
+
+    credit_limit,
+
+    phone,
+
+    street_name,
+
+    city_name,
+
+    region_name,
+
+    dbt_valid_from AS valid_from,
+
+    dbt_valid_to AS valid_to,
+
+    CASE
+
+        WHEN dbt_valid_to IS NULL THEN TRUE
+
+        ELSE FALSE
+
+    END AS is_current
+
+    ,current_timestamp() as gold_process_at
+
+FROM {{ ref('snapshot_customers') }}
+
+
+dim_products.sql:
+{{
+
+    config(
+
+        materialized='table'
+
+    )
+
+}}
+
+
+SELECT 
+
+        {{ generate_surrogate_key(['product_id']) }} AS product_key,
+
+        product_id,
+
+        product_name,
+
+        brand,
+
+        subcategory_name,
+
+        category_name,
+
+        unit_price,
+
+        primary_supplier,
+
+        dbt_valid_from AS valid_from,
+
+        dbt_valid_to AS valid_to,
+
+        CASE
+
+            WHEN dbt_valid_to IS NULL THEN TRUE
+
+            ELSE FALSE
+
+        END AS is_current
+
+        ,current_timestamp() as gold_process_at
+
+FROM {{ ref('snapshot_products') }} 
+
+
+dim_campaign.sql:
+
+{{
+
+    config(
+
+    materialized = 'table'
+
+    )
+
+}}
+
+WITH source_table as (
+
+    SELECT DISTINCT campaign_name,channel,start_date,end_date,budget
+
+    FROM {{ ref('campaign_log') }}
+
+    )
+
+SELECT {{ generate_surrogate_key(['campaign_name','channel','start_date','end_date']) }} AS campaign_key,*
+
+       ,current_timestamp() as gold_process_at
+
+FROM source_table
+
+
+dim_date.sql:
+
+
+{{
+    config(
+        materialized='table'
+    )
+}}
+
+WITH source_data as (
+
+    SELECT MIN(min_date) as min_date,
+           MAX(max_date) as max_date
+    FROM {{ source('retail_databricks_gold', 'metadata_fact_date_ranges')}}
+    
+
+),
+    buffered_date_range AS(
+        SELECT
+            ADD_MONTHS(
+                min_date,
+                -12
+            ) AS start_date,
+
+            ADD_MONTHS(
+                max_date,
+                12
+            ) AS end_date
+        FROM source_data
+
+    ),
+    dates AS(
+        SELECT EXPLODE(SEQUENCE(start_date, end_date, INTERVAL 1 DAY)) as calendar_date
+        FROM buffered_date_range
+    ),
+    calender_table AS(
+        SELECT
+               CAST(DATE_FORMAT(calendar_date,'yyyymmdd') AS INT) AS date_key,
+               calendar_date,
+               DAYOFWEEK(calendar_date) AS day_of_week,
+               DAYOFYEAR(calendar_date) AS day_of_year,
+               DATE_FORMAT(calendar_date,'EEEE') AS day_name,
+               MONTH(calendar_date) AS MONTH,
+               DATE_FORMAT(calendar_date,'MMMM') AS month_name,
+               LAST_DAY(calendar_date) AS month_end_date,
+               CONCAT(DATE_FORMAT(calendar_date,'MM'),'-',YEAR(calendar_date)) AS month_year,
+               QUARTER(calendar_date) AS quarter_number,
+               CONCAT('Q',QUARTER(calendar_date)) AS quarter_name,
+               CONCAT('Q',QUARTER(calendar_date),'-',YEAR(calendar_date)) AS quarter_year,
+               YEAR(calendar_date) AS year
+
+
+
+        FROM dates
+        
+    )
+
+
+SELECT *
+       ,current_timestamp() as gold_process_at
+FROM calender_table
+
+
+dim_geo.sql:
+{{
+
+    config(
+
+        materialized='table'
+
+    )
+
+}}
+
+
+
+WITH cities as (
+
+    SELECT city_name,region_name
+
+    FROM {{ ref('cities') }}
+
+    qualify row_number() over(partition by city_name,region_name order by city_name) = 1
+
+    )
+
+SELECT {{ generate_surrogate_key(['city_name','region_name']) }} as geo_key,*
+
+       ,current_timestamp() as gold_process_at
+
+FROM cities
+
+
+dim_order_flags.sql:
+{{ config(
+
+    materialized='table'
+
+) }}
+
+
+WITH distinct_orders AS (
+
+    SELECT
+
+        order_channel,
+
+        order_status,
+
+        order_priority
+
+    FROM {{ ref('orders') }}
+
+    QUALIFY ROW_NUMBER() OVER(
+
+        PARTITION BY order_channel,order_status,order_priority
+
+        ORDER BY order_channel
+
+    ) = 1
+
+    ),
+
+    add_columns as (
+
+        SELECT 
+
+            {{ generate_surrogate_key(['order_channel','order_status','order_priority']) }} AS order_flags_key,
+
+            do.*,cr.channel_name
+
+        FROM distinct_orders do
+
+        LEFT JOIN {{ ref('seed_channel_reference') }} as cr ON do.order_channel = cr.channel_code
+
+    )
+
+SELECT *
+
+       ,current_timestamp() as gold_process_at
+
+FROM add_columns
+
+
+silver/fact:
+fact_campaign.sql:
+{{ config(
+    materialized='incremental',
+    unique_key='campaign_log_key'
+        )
+}}
+
+WITH source_table as (
+    SELECT campaign_log_key,campaign_name,channel,start_date,end_date,campaign_date,impressions,clicks,spend  
+    FROM {{ ref('campaign_log') }}
+    ),
+
+    joined_table as (
+        SELECT st.campaign_log_key,dc.campaign_key,
+            TRY_CAST(DATE_FORMAT(st.campaign_date,'yyyymmdd') AS INT) as campaign_date_key,
+            st.campaign_date,st.impressions,st.clicks,st.spend
+        FROM source_table st
+        LEFT JOIN {{ ref('dim_campaign') }} as dc 
+            ON st.campaign_name = dc.campaign_name
+            AND st.channel = dc.channel
+            AND st.start_date = dc.start_date
+            AND st.end_date = dc.end_date
+    ),
+    max_date as (
+        select  coalesce(max(campaign_date), '1900-01-01') as max_campaign_date
+        from joined_table
+    ) 
+
+SELECT *
+       ,current_timestamp() as gold_process_at
+FROM joined_table
+
+{% if is_incremental() %}
+  where  campaign_date > (select max_campaign_date from max_date)
+{% endif %}  
+
+fact_inventory.sql:
+{{ config(
+    materialized='incremental',
+    unique_key='inventory_key'
+        )
+}}
+WITH data_table as (
+        SELECT  
+                
+                c.inventory_key,
+                p.product_key,
+                TRY_CAST(DATE_FORMAT(c.inventory_date,'yyyymmdd') AS INT) as inventory_date_key,
+                c.inventory_date,
+                c.inventory_quantity
+
+        FROM {{ ref('inventory') }} as c
+        LEFT JOIN {{ ref('dim_products') }} as p ON c.product_name = p.product_name
+        ),
+        max_date as (
+        select  coalesce(max(inventory_date), '1900-01-01') as max_inventory_date
+        from data_table
+        )   
+
+SELECT *
+       ,current_timestamp() as gold_process_at
+FROM data_table
+
+
+{% if is_incremental() %}
+  where  inventory_date > (select max_inventory_date from max_date)
+{% endif %}
+
+
+
+fact_order_process.sql:
+---accumulatedING snapshot fact
+
+{{ config(
+
+    materialized='incremental',
+
+    unique_key='order_id'
+
+        )
+
+}}
+
+
+WITH data_table as (
+
+        SELECT  o.order_id,TRY_CAST(o.order_date AS date) as order_date
+
+                ,cm.customer_id
+
+                ,TRY_CAST(s.ship_date AS date) as ship_date,TRY_CAST(s.delivery_date AS date) as delivery_date,s.ship_mode
+
+                ,TRY_CAST(i.invoice_date AS date) as invoice_date,i.invoice_id
+
+                ,TRY_CAST(p.payment_date AS date) as payment_date
+
+        FROM {{ ref('orders') }} AS o
+
+        LEFT JOIN {{ref('custmer_master')}}  AS cm ON o.customer_name = cm.customer_name
+
+        LEFT JOIN {{ref('shipments')}}  AS s ON o.order_id = s.order_id
+
+        LEFT JOIN {{ref ('invoices')}} AS i ON o.order_id = i.order_id
+
+        LEFT JOIN {{ ref('payments') }} AS p ON i.invoice_id = p.invoice_id
+
+),
+
+    date_key as (
+
+        SELECT order_id,customer_id,ship_mode
+
+               ,TRY_CAST(DATE_FORMAT(order_date,'yyyymmdd') AS INT) AS order_date_key,order_date 
+
+               ,TRY_CAST(DATE_FORMAT(ship_date,'yyyymmdd') AS INT) AS ship_date_key,ship_date
+
+               ,TRY_CAST(DATE_FORMAT(delivery_date,'yyyymmdd') AS INT) AS delivery_date_key,delivery_date
+
+               ,TRY_CAST(DATE_FORMAT(invoice_date,'yyyymmdd') AS INT) AS invoice_date_key,invoice_date
+
+               ,TRY_CAST(DATE_FORMAT(payment_date,'yyyymmdd') AS INT) AS payment_date_key,payment_date
+
+        FROM data_table
+
+    ),
+
+    max_date as (
+
+        select  coalesce(max(order_date), '1900-01-01') as max_order_date
+
+        from data_table
+
+    )    
+
+SELECT order_id,customer_id,ship_mode
+
+       ,order_date_key,ship_date_key,delivery_date_key,invoice_date_key,payment_date_key
+
+       ,order_date,ship_date,delivery_date,invoice_date,payment_date
+
+       ,current_timestamp() as gold_process_at
+
+FROM date_key
+
+{% if is_incremental() %}
+
+  where  order_date > (select max_order_date from max_date)
+
+{% endif %}
+
+
+fact_promotion_converage.sql:
+---factless table
+
+{{
+
+    config(
+
+    materialized = 'table'
+
+    )
+
+}}
+
+WITH source_table as (
+
+    SELECT cs.campaign_name,cs.product_id,dp.product_key,dc.campaign_key
+
+    FROM {{ ref('campaign_skus') }} cs
+
+    LEFT JOIN {{ ref('dim_products') }} as dp ON cs.product_id = dp.product_id
+
+    LEFT JOIN {{ ref('dim_campaign') }} as dc ON cs.campaign_name = dc.campaign_name
+
+    )
+
+SELECT product_key,campaign_key
+
+       ,current_timestamp() as gold_process_at
+
+FROM source_table
+
+
+fact_sales_target.sql:
+{{ 
+    config( 
+    materialized = 'incremental', 
+    unique_key = 'inventory_key' 
+    ) 
+}} 
+ 
+WITH source_data AS ( 
+ 
+    SELECT *  
+    FROM {{ ref('sales_targets') }} 
+ 
+    ), 
+    max_date as ( 
+        select  coalesce(max(target_date), '1900-01-01') as max_target_date 
+        from source_data 
+    ) 
+ 
+SELECT * 
+       ,current_timestamp() AS gold_process_at 
+ 
+FROM source_data 
+ 
+ 
+{% if is_incremental() %} 
+  where  target_date > (select max_target_date from max_date) 
+{% endif %} 
+ 
+fact_sales.sql:
+{{ config(
+    materialized='incremental',
+    unique_key='line_id'
+        )
+}}
+
+
+
+WITH data_table as (
+        SELECT  
+                oli.line_id,
+                oli.order_id,
+                P.product_key,
+                C.customer_id,
+                of.order_flags_key,
+                g.geo_key as ship_to_city_geo_key,
+                g2.geo_key as bill_to_city_geo_key,
+                TRY_CAST(DATE_FORMAT(o.order_date,'yyyymmdd') AS INT) as order_date_key,o.order_date,
+                oli.quantity,
+                oli.unit_price,
+                oli.unit_cost,
+                oli.discount_pct,
+                oli.line_total
+
+        FROM {{ ref('order_line_items') }} as oli
+        LEFT JOIN {{ ref('orders') }} as o ON oli.order_id = o.order_id
+        LEFT JOIN {{ ref('dim_products') }} as p ON oli.product_name = p.product_name
+        LEFT JOIN {{ ref('dim_customers') }} as c ON o.customer_name = c.customer_name
+        LEFT JOIN {{ ref('dim_order_flags') }} as of 
+                ON o.order_channel = of.order_channel 
+                AND o.order_status = of.order_status 
+                AND o.order_priority = of.order_priority
+        LEFT JOIN {{ ref('dim_geo') }} as g ON o.ship_to_city = g.city_name
+        LEFT JOIN {{ ref('dim_geo') }} as g2 ON o.bill_to_city = g2.city_name 
+
+        ),
+        max_date as (
+        select  coalesce(max(order_date), '1900-01-01') as order_date
+        from data_table
+        )    
+
+SELECT          
+        line_id,order_id,product_key,order_flags_key,ship_to_city_geo_key,bill_to_city_geo_key,
+        TRY_CAST(DATE_FORMAT(order_date,'yyyymmdd') AS INT) as order_date_key,
+        order_date,
+        quantity,unit_price,unit_cost,discount_pct,line_total
+        ,current_timestamp() as gold_process_at
+
+FROM data_table
+
+{% if is_incremental() %}
+  where  order_date > (select order_date from max_date)
+{% endif %}
+
+
+this is the gold layer ,
+for the dim_customers.sql and the dim_products.sql source or based on the snapshot code
+
+snapshot:
+snapshot_customer.yml:
+snapshots:
+  - name: snapshot_customers
+    relation: ref('eph_customers')
+    config:
+      schema: snapshot
+      database: retail
+      unique_key: customer_id
+      strategy: check
+      check_cols:
+        - customer_name
+        - customer_segment
+        - account_manager
+        - payment_terms
+        - contact_name
+        - email_address
+        - credit_limit
+        - phone
+        - street_name
+        - city_name
+        - region_name
+
+      dbt_valid_to_current: null
+
+
+snapshot_products.yml:
+snapshots:
+  - name: snapshot_products
+    relation: ref('eph_products')
+    config:
+      schema: snapshot
+      database: retail
+      unique_key: product_id
+      strategy: check
+      check_cols:
+        - product_name
+        - brand
+        - subcategory_name
+        - category_name
+        - unit_price
+        - primary_supplier
+
+      dbt_valid_to_current: null
+
+also the dim_order_flags.sql is joined with the seeds:
+channel_code,channel_name
+10,Online Store
+20,Retail Partner
+30,Wholesale
+40,Field Sale
+
+
+
+
+
+dbt_project.yml:
+
+# Name your project! Project names should contain only lowercase characters
+# and underscores. A good package name should reflect your organization's
+# name or the intended use of these models
+name: 'omnichannel_retail'
+version: '1.0.0'
+
+# This setting configures which "profile" dbt uses for this project.
+profile: 'omnichannel_retail'
+
+# These configurations specify where dbt should look for different types of files.
+# The `model-paths` config, for example, states that models in this project can be
+# found in the "models/" directory. You probably won't need to change these!
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+clean-targets:         # directories to be removed by `dbt clean`
+  - "target"
+  - "dbt_packages"
+
+
+
+
+
+
+
+
+# Configuring models
+# Full documentation: https://docs.getdbt.com/docs/configuring-models
+
+# In this example config, we tell dbt to build all models in the example/
+# directory as views. These settings can be overridden in the individual model
+# files using the `{{ config(...) }}` macro.
+models:
+  omnichannel_retail:
+    # Config indicated by + and applies to all files under models/example/
+    silver:
+      +schema: silver
+      +materialized: table
+
+
+    gold:
+      +schema: gold
+      +materialized: table
+      ephemeral:
+        +materialized: ephemeral
+
+      
+
+seeds:
+  omnichannel_retail:
+    +schema: silver
+
+
+
+
+snapshots:
+  omnichannel_retail:
+    +schema: gold
+
+
+
+also i have two macros:
+custom_schema.sql:
+{% macro generate_schema_name(custom_schema_name, node) -%}
+
+    {%- set default_schema = target.schema -%}
+    {%- if custom_schema_name is none -%}
+
+        {{ default_schema }}
+
+    {%- else -%}
+
+        {{ custom_schema_name | trim }}
+
+    {%- endif -%}
+
+{%- endmacro %}
+
+generate_surrogate_key.sql:
+
+{% macro generate_surrogate_key(columns) %}
+
+    row_number() over (
+        order by
+        {% for column in columns %}
+            {{ column }}
+            {% if not loop.last %}, {% endif %}
+        {% endfor %}
+    )
+
+{% endmacro %}
+
+
+models/source:
+sources.yml:
+sources: 
+  - name: retail_databricks_bronze 
+    database: retail   
+    schema: bronze   
+    tables: 
+      - name: address 
+      - name: api_cities 
+      - name: api_shipments 
+      - name: api_subcategories 
+      - name: aws_s3_campaign_log 
+      - name: aws_s3_campaign_skus 
+      - name: aws_s3_exchange_rates 
+      - name: aws_s3_inventory 
+      - name: aws_s3_sales_targets 
+      - name: aws_s3_security 
+      - name: cust_master 
+      - name: customer_contacts 
+      - name: invoice_lines 
+      - name: invoices 
+      - name: order_line_items 
+      - name: orders 
+      - name: payments 
+      - name: products 
+      - name: user_details 
+ 
+  - name: retail_databricks_gold 
+    database: retail   
+    schema: gold   
+    tables: 
+      - name: metadata_fact_date_ranges 
+     
+metadata_fact_date_ranges i created in the databricks to get the max date and min date in the full fact tables to create dynamic dim_date.sql ok.
+
+
+that is all i have ,
+maybe for the dbt test i will create in every folder its own properties.yml that have the dbt test,
+so for the silver/api have one and the silver/postgresql have one and the silver/s3 have one 
+and for the 
+gold/dim and gold/fact and gold/ephemeral everyone have its own properties.yml that hold thier dbt test 
+
+and the tests folder will hold the custom test
+now i am finish
+
+
