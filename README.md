@@ -59,7 +59,7 @@ An end-to-end **modern data engineering and BI platform** built to ingest data f
 
 ![Data Platform Architecture](diagrams/data_architecture.png)
 
-![Data Platform Architecture](data_architecture_vendor.png)
+![Data Platform Architecture](diagrams/data_architecture_vendor.png)
 
 ### OLTP Data Model
 
