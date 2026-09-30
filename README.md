@@ -57,19 +57,21 @@ An end-to-end **modern data engineering and BI platform** built to ingest data f
 
 ### End-to-End Data Platform
 
-![Data Platform Architecture](diagrams/data_platform_architecture.png)
+![Data Platform Architecture](diagrams/data_architecture.png)
+
+![Data Platform Architecture](data_architecture_vendor.png)
 
 ### OLTP Data Model
 
 The PostgreSQL / Neon database represents the operational source system.
 
-![OLTP Data Model](diagrams/oltp_data_model.png)
+![OLTP Data Model](diagrams/oltp_design.jpeg)
 
 ### OLAP / Star Schema
 
 The Gold layer is modeled as a dimensional Star Schema for analytical workloads.
 
-![OLAP Star Schema](diagrams/olap_star_schema.png)
+![OLAP Star Schema](diagrams/olap_design.png)
 
 ### dbt Lineage
 
@@ -81,7 +83,7 @@ dbt manages the transformation dependencies from the Silver layer into the Gold 
 
 Airflow coordinates the execution of the data ingestion and transformation workflow.
 
-![Airflow Pipeline](diagrams/airflow_pipeline.png)
+![Airflow Pipeline](diagrams/airflow_orchestration.png)
 
 > **Note:** Replace the image filenames above with the exact filenames currently stored in the `diagrams/` directory.
 
